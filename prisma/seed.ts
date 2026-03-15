@@ -67,7 +67,17 @@ async function main() {
     },
   });
 
-  console.log('✅ Users created');
+  const vet = await prisma.user.create({
+    data: {
+      farmId: farm.id,
+      name: 'Dr. Emma Watson',
+      email: 'vet@example.com',
+      phone: '+44 7700 900125',
+      role: 'VET',
+    },
+  });
+
+  console.log('✅ Users created (Owner, Manager, Worker, Vet)');
 
   // Create Paddocks (10 paddocks)
   const paddockData = [

@@ -2,18 +2,85 @@ import Link from 'next/link';
 import { ReactNode } from 'react';
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: '📊' },
-    { name: 'Herd Register', href: '/dashboard/herd', icon: '🐄' },
-    { name: 'Health & Medicine', href: '/dashboard/health', icon: '🏥' },
-    { name: 'Breeding & Fertility', href: '/dashboard/breeding', icon: '💝' },
-    { name: 'Feed Management', href: '/dashboard/feed', icon: '🌾' },
-    { name: 'Weight & Growth', href: '/dashboard/weight', icon: '📈' },
-    { name: 'Calving Monitor', href: '/dashboard/calving', icon: '🍼' },
-    { name: 'Pasture & Grazing', href: '/dashboard/pasture', icon: '🌱' },
-    { name: 'Financials', href: '/dashboard/finance', icon: '💰' },
-    { name: 'Compliance & BCMS', href: '/dashboard/compliance', icon: '📋' },
-    { name: 'Alerts', href: '/dashboard/alerts', icon: '🔔' },
+  const navigationGroups = [
+    {
+      title: 'Overview',
+      items: [
+        { name: 'Dashboard', href: '/dashboard', icon: '📊' },
+        { name: 'Alerts', href: '/dashboard/alerts', icon: '🔔' },
+      ],
+    },
+    {
+      title: 'Herd',
+      items: [
+        { name: 'Herd Register', href: '/dashboard/herd', icon: '🐄' },
+        { name: 'Animal Profiles', href: '/dashboard/herd', icon: '📋' },
+        { name: 'Movements', href: '/dashboard/compliance', icon: '🚚' },
+      ],
+    },
+    {
+      title: 'Health',
+      items: [
+        { name: 'Health Records', href: '/dashboard/health', icon: '🏥' },
+        { name: 'Treatments', href: '/dashboard/health', icon: '💉' },
+        { name: 'Medications', href: '/dashboard/health', icon: '💊' },
+      ],
+    },
+    {
+      title: 'Breeding',
+      items: [
+        { name: 'Breeding Plans', href: '/dashboard/breeding', icon: '💝' },
+        { name: 'AI Records', href: '/dashboard/breeding', icon: '🧬' },
+        { name: 'Pregnancy Checks', href: '/dashboard/breeding', icon: '🤰' },
+      ],
+    },
+    {
+      title: 'Calving',
+      items: [
+        { name: 'Calving Monitor', href: '/dashboard/calving', icon: '🍼' },
+        { name: 'Due Dates', href: '/dashboard/calving', icon: '📅' },
+        { name: 'Calving History', href: '/dashboard/calving', icon: '📖' },
+      ],
+    },
+    {
+      title: 'Feed',
+      items: [
+        { name: 'Feed Plans', href: '/dashboard/feed', icon: '🌾' },
+        { name: 'Rations', href: '/dashboard/feed', icon: '🧮' },
+        { name: 'Stock Levels', href: '/dashboard/feed', icon: '📦' },
+      ],
+    },
+    {
+      title: 'Weight',
+      items: [
+        { name: 'Weight Records', href: '/dashboard/weight', icon: '⚖️' },
+        { name: 'Growth Charts', href: '/dashboard/weight', icon: '📈' },
+      ],
+    },
+    {
+      title: 'Pasture',
+      items: [
+        { name: 'Paddock Map', href: '/dashboard/pasture', icon: '🗺️' },
+        { name: 'Grazing Rotation', href: '/dashboard/pasture', icon: '🔄' },
+        { name: 'Grass Measurement', href: '/dashboard/pasture', icon: '🌱' },
+      ],
+    },
+    {
+      title: 'Finance',
+      items: [
+        { name: 'Income & Expenses', href: '/dashboard/finance', icon: '💰' },
+        { name: 'Reports', href: '/dashboard/finance', icon: '📊' },
+      ],
+    },
+    {
+      title: 'Settings',
+      items: [
+        { name: 'Farm Profile', href: '/settings', icon: '🏠' },
+        { name: 'Users', href: '/settings', icon: '👥' },
+        { name: 'BCMS Integration', href: '/settings', icon: '🔗' },
+        { name: 'Data Export', href: '/settings', icon: '📤' },
+      ],
+    },
   ];
 
   return (
@@ -52,24 +119,33 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         {/* Sidebar Navigation */}
         <aside className="hidden lg:flex lg:flex-shrink-0">
           <div className="flex flex-col w-64 border-r border-gray-200 bg-white">
-            <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="group flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition"
-                >
-                  <span className="mr-3 text-lg">{item.icon}</span>
-                  {item.name}
-                </Link>
+            <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
+              {navigationGroups.map((group) => (
+                <div key={group.title}>
+                  <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                    {group.title}
+                  </h3>
+                  <div className="space-y-1">
+                    {group.items.map((item) => (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        className="group flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition"
+                      >
+                        <span className="mr-3 text-lg">{item.icon}</span>
+                        {item.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               ))}
             </nav>
 
             <div className="p-4 border-t border-gray-200">
               <div className="bg-emerald-50 rounded-lg p-4">
                 <p className="text-xs font-medium text-emerald-900 mb-1">Professional Plan</p>
-                <p className="text-xs text-emerald-700">450 / 500 head</p>
-                <Link href="/dashboard/settings" className="text-xs text-emerald-700 hover:text-emerald-900 font-medium mt-2 inline-block">
+                <p className="text-xs text-emerald-700">350 / 500 head</p>
+                <Link href="/settings" className="text-xs text-emerald-700 hover:text-emerald-900 font-medium mt-2 inline-block">
                   Manage subscription →
                 </Link>
               </div>
