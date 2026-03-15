@@ -1,0 +1,821 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ========================================
+// ENUMS
+// ========================================
+
+enum Role {
+  FARM_OWNER
+  FARM_MANAGER
+  WORKER
+  VET
+  AUDITOR
+}
+
+enum SubscriptionPlan {
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum CattleType {
+  DAIRY
+  BEEF
+  DUAL_PURPOSE
+}
+
+enum CattleSex {
+  BULL
+  STEER
+  COW
+  HEIFER
+}
+
+enum CattleStatus {
+  ALIVE
+  SOLD
+  DEAD
+  CULLED
+}
+
+enum MovementType {
+  ON
+  OFF
+  BIRTH
+  DEATH
+  INTERNAL
+}
+
+enum ServiceType {
+  ARTIFICIAL_INSEMINATION
+  NATURAL_SERVICE
+}
+
+enum BirthEase {
+  EASY
+  MODERATE
+  DIFFICULT
+  CAESAREAN
+  STILLBORN
+}
+
+enum HealthEventType {
+  VACCINATION
+  TREATMENT
+  EXAMINATION
+  INJURY
+  ILLNESS
+  SURGERY
+}
+
+enum AlertType {
+  HEAT_DETECTION
+  CALVING_IMMINENT
+  HEALTH_ALERT
+  WEIGHT_DROP
+  LOW_ACTIVITY
+  HIGH_TEMPERATURE
+  FEED_EFFICIENCY_LOW
+  OVERDUE_CALVING
+  MEDICINE_WITHDRAWAL_END
+}
+
+enum AlertStatus {
+  ACTIVE
+  ACKNOWLEDGED
+  RESOLVED
+  DISMISSED
+}
+
+enum FeedType {
+  SILAGE
+  HAY
+  GRAIN
+  CONCENTRATE
+  MINERAL
+  SUPPLEMENT
+}
+
+// ========================================
+// CORE MODELS
+// ========================================
+
+model Farm {
+  id                    String            @id @default(cuid())
+  name                  String
+  sbi                   String?           @unique
+  address               String
+  postcode              String
+  lat                   Float?
+  lng                   Float?
+  totalHectares         Float?
+  cphNumber             String?           @unique
+  herdMark              String?
+  subscriptionPlan      SubscriptionPlan  @default(STARTER)
+  subscriptionStartDate DateTime          @default(now())
+  subscriptionEndDate   DateTime?
+  stripeCustomerId      String?           @unique
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  users                 User[]
+  cattle                Cattle[]
+  movements             Movement[]
+  healthRecords         HealthRecord[]
+  breedingRecords       BreedingRecord[]
+  calvingRecords        CalvingRecord[]
+  feedInventory         FeedInventory[]
+  feedRations           FeedRation[]
+  paddocks              Paddock[]
+  grazingRotations      GrazingRotation[]
+  financialRecords      FinancialRecord[]
+  invoices              Invoice[]
+  grants                Grant[]
+  alerts                Alert[]
+  sensorData            SensorData[]
+  bcmsSubmissions       BCMSSubmission[]
+  cattlePassports       CattlePassport[]
+}
+
+model User {
+  id                String    @id @default(cuid())
+  farmId            String
+  farm              Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  name              String
+  email             String    @unique
+  phone             String?
+  role              Role      @default(WORKER)
+  avatar            String?
+  emailVerified     DateTime?
+  password          String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  healthRecordsCreated    HealthRecord[]
+  breedingRecordsCreated  BreedingRecord[]
+  calvingRecordsCreated   CalvingRecord[]
+  weightRecordsCreated    WeightRecord[]
+
+  @@index([farmId])
+}
+
+// ========================================
+// MODULE 1: RECORD-KEEPING & COMPLIANCE
+// ========================================
+
+model Cattle {
+  id                String        @id @default(cuid())
+  farmId            String
+  farm              Farm          @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  
+  // Identification
+  tagNumber         String        @unique
+  rfidTag           String?       @unique
+  name              String?
+  
+  // Basic Info
+  type              CattleType
+  sex               CattleSex
+  breed             String
+  dob               DateTime
+  status            CattleStatus  @default(ALIVE)
+  
+  // Lineage
+  damId             String?
+  dam               Cattle?       @relation("Offspring", fields: [damId], references: [id], onDelete: SetNull)
+  sireId            String?
+  registrationNumber String?
+  
+  // Current Info
+  currentPaddockId  String?
+  currentPaddock    Paddock?      @relation(fields: [currentPaddockId], references: [id], onDelete: SetNull)
+  currentWeight     Float?
+  lastWeightDate    DateTime?
+  
+  // Purchase/Sale
+  purchaseDate      DateTime?
+  purchasePrice     Float?
+  saleDate          DateTime?
+  salePrice         Float?
+  
+  // Timestamps
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  // Relations
+  offspring         Cattle[]      @relation("Offspring")
+  movements         Movement[]
+  healthRecords     HealthRecord[]
+  breedingRecordsAsMother    BreedingRecord[] @relation("Mother")
+  breedingRecordsAsFather    BreedingRecord[] @relation("Father")
+  calvingRecords    CalvingRecord[]
+  weightRecords     WeightRecord[]
+  sensorData        SensorData[]
+  cattlePassport    CattlePassport?
+
+  @@index([farmId])
+  @@index([status])
+  @@index([type])
+  @@index([currentPaddockId])
+}
+
+model Movement {
+  id                  String        @id @default(cuid())
+  farmId              String
+  farm                Farm          @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  cattleId            String
+  cattle              Cattle        @relation(fields: [cattleId], references: [id], onDelete: Cascade)
+  
+  movementType        MovementType
+  date                DateTime
+  
+  fromCph             String?
+  toCph               String?
+  fromLocation        String?
+  toLocation          String?
+  
+  haulier             String?
+  vehicleReg          String?
+  
+  // BCMS Compliance
+  bcmsSubmitted       Boolean       @default(false)
+  bcmsSubmissionDate  DateTime?
+  bcmsReference       String?
+  
+  notes               String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  bcmsSubmissions     BCMSSubmission[]
+
+  @@index([farmId])
+  @@index([cattleId])
+  @@index([date])
+  @@index([bcmsSubmitted])
+}
+
+model CattlePassport {
+  id                    String    @id @default(cuid())
+  farmId                String
+  farm                  Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  cattleId              String    @unique
+  cattle                Cattle    @relation(fields: [cattleId], references: [id], onDelete: Cascade)
+  
+  passportNumber        String    @unique
+  issueDate             DateTime
+  breedDescription      String
+  identityMarks         String?
+  photoUrl              String?
+  replacementReason     String?
+  
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([farmId])
+}
+
+model BCMSSubmission {
+  id                  String    @id @default(cuid())
+  farmId              String
+  farm                Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  movementId          String?
+  movement            Movement? @relation(fields: [movementId], references: [id], onDelete: Cascade)
+  
+  submissionType      String
+  submissionDate      DateTime  @default(now())
+  bcmsResponse        String?
+  status              String
+  errorMessage        String?
+  referenceNumber     String?
+  
+  createdAt           DateTime  @default(now())
+
+  @@index([farmId])
+  @@index([movementId])
+  @@index([status])
+}
+
+// ========================================
+// MODULE 2: HEALTH MONITORING
+// ========================================
+
+model HealthRecord {
+  id                  String          @id @default(cuid())
+  farmId              String
+  farm                Farm            @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  cattleId            String
+  cattle              Cattle          @relation(fields: [cattleId], references: [id], onDelete: Cascade)
+  
+  eventType           HealthEventType
+  date                DateTime
+  
+  // Medicine/Treatment
+  productName         String?
+  batchNumber         String?
+  dose                String?
+  withdrawalMeatDays  Int?
+  withdrawalMilkDays  Int?
+  withdrawalEnds      DateTime?
+  
+  // Veterinary
+  vetName             String?
+  diagnosis           String?
+  prescription        String?
+  
+  // General
+  symptoms            String?
+  temperature         Float?
+  treatment           String?
+  outcome             String?
+  followUpRequired    Boolean         @default(false)
+  followUpDate        DateTime?
+  
+  cost                Float?
+  notes               String?
+  
+  administeredById    String?
+  administeredBy      User?           @relation(fields: [administeredById], references: [id], onDelete: SetNull)
+  
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@index([farmId])
+  @@index([cattleId])
+  @@index([date])
+  @@index([withdrawalEnds])
+}
+
+model SensorData {
+  id                String    @id @default(cuid())
+  farmId            String
+  farm              Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  cattleId          String
+  cattle            Cattle    @relation(fields: [cattleId], references: [id], onDelete: Cascade)
+  
+  timestamp         DateTime  @default(now())
+  
+  // Activity & Behaviour
+  activityLevel     Int?      // 0-100
+  ruminationMinutes Int?
+  restingMinutes    Int?
+  walkingDistance   Float?    // meters
+  
+  // Physiological
+  bodyTemperature   Float?
+  heartRate         Int?
+  
+  // Alerts
+  heatDetected      Boolean   @default(false)
+  calvingAlert      Boolean   @default(false)
+  healthAlert       Boolean   @default(false)
+  
+  rawDataJson       String?   // JSON blob for additional sensor data
+  
+  @@index([farmId])
+  @@index([cattleId])
+  @@index([timestamp])
+}
+
+model Alert {
+  id                String        @id @default(cuid())
+  farmId            String
+  farm              Farm          @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  
+  type              AlertType
+  status            AlertStatus   @default(ACTIVE)
+  severity          String        // LOW, MEDIUM, HIGH, CRITICAL
+  
+  cattleId          String?
+  title             String
+  message           String
+  
+  triggerData       String?       // JSON blob
+  actionTaken       String?
+  
+  createdAt         DateTime      @default(now())
+  acknowledgedAt    DateTime?
+  resolvedAt        DateTime?
+  
+  @@index([farmId])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// ========================================
+// MODULE 3: BREEDING & FERTILITY
+// ========================================
+
+model BreedingRecord {
+  id                  String        @id @default(cuid())
+  farmId              String
+  farm                Farm          @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  
+  cowId               String
+  cow                 Cattle        @relation("Mother", fields: [cowId], references: [id], onDelete: Cascade)
+  bullId              String?
+  bull                Cattle?       @relation("Father", fields: [bullId], references: [id], onDelete: SetNull)
+  
+  serviceType         ServiceType
+  serviceDate         DateTime
+  
+  // AI Specific
+  aiTechnicianName    String?
+  strawNumber         String?
+  bullBreed           String?
+  
+  // Pregnancy
+  pregnancyConfirmed  Boolean       @default(false)
+  pregnancyCheckDate  DateTime?
+  expectedCalvingDate DateTime?
+  
+  // Outcome
+  successfulCalving   Boolean?
+  calvingRecordId     String?
+  
+  heatCycleDay        Int?
+  notes               String?
+  cost                Float?
+  
+  recordedById        String?
+  recordedBy          User?         @relation(fields: [recordedById], references: [id], onDelete: SetNull)
+  
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  @@index([farmId])
+  @@index([cowId])
+  @@index([serviceDate])
+  @@index([expectedCalvingDate])
+}
+
+model CalvingRecord {
+  id                  String        @id @default(cuid())
+  farmId              String
+  farm                Farm          @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  
+  cowId               String
+  cow                 Cattle        @relation(fields: [cowId], references: [id], onDelete: Cascade)
+  
+  calvingDate         DateTime
+  birthEase           BirthEase
+  
+  // Calf Info
+  calfId              String?
+  calfSex             CattleSex?
+  calfWeight          Float?
+  calfVigor           String?       // STRONG, WEAK, STILLBORN
+  
+  // Assistance
+  assistanceRequired  Boolean       @default(false)
+  assistedById        String?
+  assistedBy          User?         @relation(fields: [assistedById], references: [id], onDelete: SetNull)
+  vetAttended         Boolean       @default(false)
+  vetName             String?
+  
+  // Health
+  placentaExpelled    Boolean       @default(true)
+  placentaTime        Int?          // minutes after birth
+  colostrum           Boolean       @default(true)
+  
+  complications       String?
+  notes               String?
+  cost                Float?
+  
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  @@index([farmId])
+  @@index([cowId])
+  @@index([calvingDate])
+}
+
+// ========================================
+// MODULE 4: FEED MANAGEMENT
+// ========================================
+
+model FeedInventory {
+  id                String    @id @default(cuid())
+  farmId            String
+  farm              Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  
+  feedType          FeedType
+  name              String
+  supplier          String?
+  
+  // Stock
+  currentStock      Float     // tonnes or kg
+  unit              String    // tonnes, kg, bags
+  location          String?
+  
+  // Cost
+  costPerUnit       Float?
+  lastPurchaseDate  DateTime?
+  
+  // Nutrition
+  dryMatterPercent  Float?
+  proteinPercent    Float?
+  energyMJPerKg     Float?
+  
+  notes             String?
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  rationComponents  FeedRationComponent[]
+
+  @@index([farmId])
+  @@index([feedType])
+}
+
+model FeedRation {
+  id                String    @id @default(cuid())
+  farmId            String
+  farm              Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  
+  name              String
+  description       String?
+  
+  // Target Group
+  cattleType        CattleType
+  ageGroup          String?   // CALF, WEANER, GROWING, FINISHING, LACTATING, DRY
+  
+  // Targets
+  targetDMI         Float?    // kg dry matter intake per day
+  targetProtein     Float?    // %
+  targetEnergy      Float?    // MJ/kg
+  
+  isActive          Boolean   @default(true)
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  components        FeedRationComponent[]
+  feedingRecords    FeedingRecord[]
+
+  @@index([farmId])
+  @@index([cattleType])
+}
+
+model FeedRationComponent {
+  id                String        @id @default(cuid())
+  rationId          String
+  ration            FeedRation    @relation(fields: [rationId], references: [id], onDelete: Cascade)
+  feedInventoryId   String
+  feedInventory     FeedInventory @relation(fields: [feedInventoryId], references: [id], onDelete: Cascade)
+  
+  amountKg          Float
+  percentage        Float?
+  
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([rationId])
+  @@index([feedInventoryId])
+}
+
+model FeedingRecord {
+  id                String      @id @default(cuid())
+  rationId          String
+  ration            FeedRation  @relation(fields: [rationId], references: [id], onDelete: Cascade)
+  
+  date              DateTime
+  numberOfCattle    Int
+  totalFedKg        Float
+  costPerHead       Float?
+  
+  notes             String?
+  
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@index([rationId])
+  @@index([date])
+}
+
+// ========================================
+// MODULE 5: WEIGHT & GROWTH TRACKING
+// ========================================
+
+model WeightRecord {
+  id                String    @id @default(cuid())
+  cattleId          String
+  cattle            Cattle    @relation(fields: [cattleId], references: [id], onDelete: Cascade)
+  
+  date              DateTime
+  weight            Float     // kg
+  
+  // Method
+  method            String    // MANUAL, WALK_OVER_SCALE, TAPE, ESTIMATED
+  equipmentId       String?
+  
+  // Context
+  feedCostToDate    Float?
+  ageInDays         Int?
+  
+  recordedById      String?
+  recordedBy        User?     @relation(fields: [recordedById], references: [id], onDelete: SetNull)
+  
+  notes             String?
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([cattleId])
+  @@index([date])
+}
+
+// ========================================
+// MODULE 6: CALVING MONITORING
+// (Covered in CalvingRecord model above)
+// ========================================
+
+// ========================================
+// MODULE 7: PASTURE & GRAZING MANAGEMENT
+// ========================================
+
+model Paddock {
+  id                String    @id @default(cuid())
+  farmId            String
+  farm              Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  
+  name              String
+  reference         String?
+  areaHectares      Float
+  
+  // Location
+  boundaryGeoJSON   String?
+  soilType          String?
+  
+  // Grass Management
+  currentCover      Int?      // kg DM/ha
+  lastGrazedDate    DateTime?
+  lastCutDate       DateTime?
+  lastFertilised    DateTime?
+  
+  // Capacity
+  stockingRate      Float?    // LU/ha
+  carryingCapacity  Int?      // number of cattle
+  
+  // Water & Infrastructure
+  waterSource       Boolean   @default(false)
+  fencing           String?   // GOOD, FAIR, POOR
+  gateAccess        Boolean   @default(true)
+  
+  notes             String?
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  cattle            Cattle[]
+  grazingRotations  GrazingRotation[]
+  grassGrowthData   GrassGrowthData[]
+
+  @@index([farmId])
+}
+
+model GrazingRotation {
+  id                String    @id @default(cuid())
+  farmId            String
+  farm              Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  paddockId         String
+  paddock           Paddock   @relation(fields: [paddockId], references: [id], onDelete: Cascade)
+  
+  moveInDate        DateTime
+  moveOutDate       DateTime?
+  
+  numberOfCattle    Int
+  preCoverKgDM      Int?
+  postCoverKgDM     Int?
+  
+  grazingDays       Int?
+  residualHeight    Float?    // cm
+  
+  notes             String?
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([farmId])
+  @@index([paddockId])
+  @@index([moveInDate])
+}
+
+model GrassGrowthData {
+  id                String    @id @default(cuid())
+  paddockId         String
+  paddock           Paddock   @relation(fields: [paddockId], references: [id], onDelete: Cascade)
+  
+  date              DateTime
+  coverKgDM         Int       // kg dry matter per hectare
+  height            Float?    // cm
+  growthRate        Int?      // kg DM/ha/day
+  
+  // Source
+  source            String    // MANUAL, PLATE_METER, SATELLITE
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([paddockId])
+  @@index([date])
+}
+
+// ========================================
+// MODULE 8: FINANCIAL & FARM ADMIN
+// ========================================
+
+model FinancialRecord {
+  id                String    @id @default(cuid())
+  farmId            String
+  farm              Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  
+  category          String    // LIVESTOCK_SALES, LIVESTOCK_PURCHASE, FEED, VET, MEDICINE, FUEL, etc.
+  type              String    // INCOME, EXPENSE
+  
+  date              DateTime
+  amount            Float
+  vat               Float?
+  
+  description       String
+  supplier          String?
+  reference         String?
+  
+  cattleId          String?
+  invoiceId         String?
+  
+  notes             String?
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([farmId])
+  @@index([category])
+  @@index([type])
+  @@index([date])
+}
+
+model Invoice {
+  id                String    @id @default(cuid())
+  farmId            String
+  farm              Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  
+  type              String    // SALES, PURCHASE
+  number            String
+  date              DateTime
+  dueDate           DateTime?
+  
+  customerSupplier  String
+  description       String
+  
+  subtotal          Float
+  vat               Float
+  total             Float
+  
+  status            String    // DRAFT, SENT, PAID, OVERDUE, CANCELLED
+  paidDate          DateTime?
+  
+  fileUrl           String?
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([farmId])
+  @@index([status])
+  @@index([date])
+}
+
+model Grant {
+  id                String    @id @default(cuid())
+  farmId            String
+  farm              Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  
+  scheme            String    // BPS, SFI, COUNTRYSIDE_STEWARDSHIP, etc.
+  year              Int
+  
+  applicationDate   DateTime?
+  applicationRef    String?
+  
+  claimAmount       Float?
+  approvedAmount    Float?
+  paymentReceived   Float?
+  paymentDate       DateTime?
+  
+  status            String    // PLANNING, APPLIED, APPROVED, REJECTED, PAID
+  
+  notes             String?
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([farmId])
+  @@index([scheme])
+  @@index([year])
+}
