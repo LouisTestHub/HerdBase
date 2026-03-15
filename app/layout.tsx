@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Hedgerow - UK Agriculture Compliance & Management",
-  description: "Complete compliance-first farm management platform for UK holdings",
+  title: "HerdBase - UK Cattle Herd Management Platform",
+  description: "Complete cattle herd management platform for UK farmers - records, health, breeding, and business in one system",
 };
 
 export default function RootLayout({
