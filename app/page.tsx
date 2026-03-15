@@ -7,23 +7,24 @@ export default function HomePage() {
       <header className="border-b border-emerald-100 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-emerald-700 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-[#1B5E20] rounded-lg flex items-center justify-center">
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-emerald-900">HerdBase</h1>
-              <p className="text-xs text-emerald-600">One system for your entire herd</p>
+              <h1 className="text-2xl font-bold text-[#1B5E20]">HerdBase</h1>
+              <p className="text-xs text-gray-600">Complete cattle management for UK farmers</p>
             </div>
           </div>
           <nav className="hidden md:flex space-x-8">
-            <Link href="#features" className="text-gray-700 hover:text-emerald-700 transition">Features</Link>
-            <Link href="#pricing" className="text-gray-700 hover:text-emerald-700 transition">Pricing</Link>
-            <Link href="#testimonials" className="text-gray-700 hover:text-emerald-700 transition">Testimonials</Link>
-            <Link href="/vision" className="text-gray-700 hover:text-emerald-700 transition">Vision</Link>
+            <Link href="/features" className="text-gray-700 hover:text-[#1B5E20] transition">Features</Link>
+            <Link href="/pricing" className="text-gray-700 hover:text-[#1B5E20] transition">Pricing</Link>
+            <Link href="/about" className="text-gray-700 hover:text-[#1B5E20] transition">About</Link>
+            <Link href="/case-studies" className="text-gray-700 hover:text-[#1B5E20] transition">Case Studies</Link>
+            <Link href="/contact" className="text-gray-700 hover:text-[#1B5E20] transition">Contact</Link>
           </nav>
-          <Link href="/login" className="bg-emerald-700 text-white px-6 py-2 rounded-lg hover:bg-emerald-800 transition">
+          <Link href="/login" className="bg-[#1B5E20] text-white px-6 py-2 rounded-lg hover:bg-[#2E7D32] transition">
             Sign In
           </Link>
         </div>
@@ -33,8 +34,11 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="inline-block bg-emerald-100 text-emerald-800 px-4 py-1 rounded-full text-sm font-medium mb-6">
-              Trusted by 500+ UK cattle farmers
+            <div className="inline-flex items-center bg-[#1B5E20]/10 border-2 border-[#1B5E20] px-4 py-2 rounded-full text-sm font-semibold mb-6 text-[#1B5E20]">
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              Trusted by 200+ UK cattle farmers • BCMS Compliant
             </div>
             <h2 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
               Stop losing cattle records in notebooks
@@ -247,25 +251,24 @@ export default function HomePage() {
             <div>
               <h4 className="text-white font-semibold mb-4">Product</h4>
               <ul className="space-y-2 text-sm">
-                <li><Link href="#features" className="hover:text-white transition">Features</Link></li>
-                <li><Link href="#pricing" className="hover:text-white transition">Pricing</Link></li>
-                <li><Link href="#" className="hover:text-white transition">Mobile App</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Support</h4>
-              <ul className="space-y-2 text-sm">
-                <li><Link href="#" className="hover:text-white transition">Help Centre</Link></li>
-                <li><Link href="#" className="hover:text-white transition">Contact Us</Link></li>
-                <li><Link href="#" className="hover:text-white transition">Training</Link></li>
+                <li><Link href="/features" className="hover:text-white transition">Features</Link></li>
+                <li><Link href="/pricing" className="hover:text-white transition">Pricing</Link></li>
+                <li><Link href="/bcms-compliance" className="hover:text-white transition">BCMS Compliance</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="text-white font-semibold mb-4">Company</h4>
               <ul className="space-y-2 text-sm">
-                <li><Link href="#" className="hover:text-white transition">About</Link></li>
-                <li><Link href="#" className="hover:text-white transition">Privacy</Link></li>
-                <li><Link href="#" className="hover:text-white transition">Terms</Link></li>
+                <li><Link href="/about" className="hover:text-white transition">About</Link></li>
+                <li><Link href="/case-studies" className="hover:text-white transition">Case Studies</Link></li>
+                <li><Link href="/contact" className="hover:text-white transition">Contact</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-white font-semibold mb-4">Resources</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/resources" className="hover:text-white transition">Blog & Guides</Link></li>
+                <li><Link href="#" className="hover:text-white transition">Help Centre</Link></li>
               </ul>
             </div>
           </div>
