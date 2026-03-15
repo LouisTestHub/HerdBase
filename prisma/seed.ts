@@ -2,6 +2,20 @@ import { PrismaClient, CattleType, CattleSex, CattleStatus, ServiceType, BirthEa
 
 const prisma = new PrismaClient();
 
+// Helper function to batch Promise execution to avoid connection pool exhaustion
+async function batchExecute<T>(promises: Promise<T>[], batchSize: number = 50, delayMs: number = 100): Promise<T[]> {
+  const results: T[] = [];
+  for (let i = 0; i < promises.length; i += batchSize) {
+    const batch = promises.slice(i, i + batchSize);
+    const batchResults = await Promise.all(batch);
+    results.push(...batchResults);
+    if (i + batchSize < promises.length) {
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+  }
+  return results;
+}
+
 async function main() {
   console.log('🌱 Seeding Oakfield Farm...');
 
@@ -330,7 +344,7 @@ async function main() {
       );
     }
   }
-  await Promise.all(breedingRecordPromises);
+  await batchExecute(breedingRecordPromises);
 
   console.log('✅ Breeding records created');
 
@@ -361,7 +375,7 @@ async function main() {
       );
     }
   }
-  await Promise.all(calvingRecordPromises);
+  await batchExecute(calvingRecordPromises);
 
   console.log('✅ Calving records created');
 
@@ -395,7 +409,7 @@ async function main() {
       );
     }
   }
-  await Promise.all(healthRecordPromises);
+  await batchExecute(healthRecordPromises);
 
   console.log('✅ Health records created');
 
@@ -419,7 +433,7 @@ async function main() {
       })
     );
   }
-  await Promise.all(movementPromises);
+  await batchExecute(movementPromises);
 
   console.log('✅ Movement records created');
 
@@ -448,7 +462,7 @@ async function main() {
       );
     }
   }
-  await Promise.all(sensorPromises);
+  await batchExecute(sensorPromises);
 
   console.log('✅ Sensor data created');
 
@@ -524,7 +538,7 @@ async function main() {
       );
     }
   }
-  await Promise.all(rotationPromises);
+  await batchExecute(rotationPromises);
 
   console.log('✅ Grazing rotations created');
 
@@ -699,7 +713,7 @@ async function main() {
       })
     );
   }
-  await Promise.all(passportPromises);
+  await batchExecute(passportPromises);
 
   console.log('✅ Cattle passports created');
 
