@@ -1,8 +1,6 @@
+import { redirect } from 'next/navigation';
+
 export default function SettingsPage() {
-  return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-4">Settings</h1>
-      <p className="text-gray-600">Farm profile, user management, billing, integrations coming soon...</p>
-    </div>
-  );
+  // Settings page is coming soon - redirect to main dashboard
+  redirect('/dashboard');
 }
