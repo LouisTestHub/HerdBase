@@ -5,240 +5,403 @@ export const dynamic = "force-dynamic";
 const prisma = new PrismaClient();
 
 export default async function CompliancePage() {
-  const [movements, bCMSSubmissions, passports] = await Promise.all([
-    prisma.movement.findMany({
-      take: 50,
-      orderBy: { date: 'desc' },
-      include: {
-        cattle: { select: { tagNumber: true, name: true, breed: true } },
-      },
-    }),
-    prisma.bCMSSubmission.findMany({
-      take: 20,
-      orderBy: { submissionDate: 'desc' },
-      include: {
-        movement: { include: { cattle: { select: { tagNumber: true } } } },
-      },
-    }),
-    prisma.cattlePassport.findMany({
-      take: 50,
-      orderBy: { issueDate: 'desc' },
-      include: {
-        cattle: { select: { tagNumber: true, name: true, breed: true } },
-      },
-    }),
-  ]);
+  const farm = await prisma.farm.findFirst();
+  
+  const totalCattle = await prisma.cattle.count({ where: { status: 'ALIVE' } });
+  
+  const movements = await prisma.movement.findMany({
+    where: { bcmsSubmitted: false },
+    take: 10,
+    orderBy: { date: 'desc' },
+  });
 
-  const pendingBcms = movements.filter((m) => !m.bcmsSubmitted).length;
-  const successfulSubmissions = bCMSSubmissions.filter((s) => s.status === 'SUCCESS').length;
-  const failedSubmissions = bCMSSubmissions.filter((s) => s.status === 'FAILED').length;
+  const healthRecords = await prisma.healthRecord.findMany({
+    where: {
+      withdrawalEnds: { gte: new Date() },
+    },
+    include: {
+      cattle: { select: { tagNumber: true, name: true } },
+    },
+    orderBy: { withdrawalEnds: 'asc' },
+    take: 10,
+  });
+
+  // Mock compliance data
+  const complianceChecks = {
+    bcms: {
+      status: movements.length === 0 ? 'COMPLIANT' : 'ACTION_REQUIRED',
+      lastUpdate: new Date('2025-03-10'),
+      nextDeadline: new Date('2025-04-01'),
+      pendingActions: movements.length,
+    },
+    tbTesting: {
+      status: 'COMPLIANT',
+      lastTest: new Date('2024-12-15'),
+      nextDue: new Date('2025-12-15'),
+      herdStatus: 'OTF',
+    },
+    medicineRecords: {
+      status: healthRecords.length > 0 ? 'ACTIVE_WITHDRAWALS' : 'COMPLIANT',
+      activeWithdrawals: healthRecords.length,
+      nextExpiry: healthRecords[0]?.withdrawalEnds,
+    },
+    redTractor: {
+      status: 'COMPLIANT',
+      lastAudit: new Date('2024-09-20'),
+      nextAudit: new Date('2025-09-20'),
+      certificateExpiry: new Date('2026-09-20'),
+    },
+    crossCompliance: {
+      status: 'COMPLIANT',
+      lastCheck: new Date('2024-11-05'),
+      nextReview: new Date('2025-05-01'),
+    },
+    bps: {
+      status: 'SUBMITTED',
+      claimYear: 2025,
+      submissionDate: new Date('2025-02-28'),
+      paymentExpected: new Date('2025-12-01'),
+    },
+    vetVisits: {
+      lastVisit: new Date('2025-02-20'),
+      nextScheduled: new Date('2025-05-15'),
+      annualHealthPlan: 'CURRENT',
+    },
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'COMPLIANT':
+      case 'CURRENT':
+      case 'OTF':
+        return 'green';
+      case 'ACTION_REQUIRED':
+      case 'ACTIVE_WITHDRAWALS':
+        return 'yellow';
+      case 'NON_COMPLIANT':
+      case 'OVERDUE':
+        return 'red';
+      default:
+        return 'gray';
+    }
+  };
 
   return (
-    <div className="p-8">
+    <div className="p-8 max-w-7xl mx-auto">
+      {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Compliance & BCMS</h1>
-        <p className="text-gray-600">BCMS submissions, cattle passports, movement logs, and inspections</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Compliance Dashboard</h1>
+        <p className="text-gray-600">{farm?.name} • Single view of all regulatory requirements</p>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-amber-50 rounded-xl p-6 border border-amber-200">
-          <span className="text-3xl block mb-2">⏳</span>
-          <p className="text-3xl font-bold text-amber-700">{pendingBcms}</p>
-          <p className="text-sm text-amber-600">Pending BCMS Submission</p>
+      {/* Overall Status */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Overall Compliance Status</h2>
+            <p className="text-sm text-gray-600 mt-1">Last updated: {new Date().toLocaleDateString()}</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            {movements.length > 0 ? (
+              <>
+                <span className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></span>
+                <span className="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg font-medium">
+                  Action Required
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                <span className="px-4 py-2 bg-green-100 text-green-800 rounded-lg font-medium">
+                  All Compliant
+                </span>
+              </>
+            )}
+          </div>
         </div>
-        <div className="bg-emerald-50 rounded-xl p-6 border border-emerald-200">
-          <span className="text-3xl block mb-2">✅</span>
-          <p className="text-3xl font-bold text-emerald-700">{successfulSubmissions}</p>
-          <p className="text-sm text-emerald-600">Successful Submissions</p>
-        </div>
-        <div className="bg-red-50 rounded-xl p-6 border border-red-200">
-          <span className="text-3xl block mb-2">❌</span>
-          <p className="text-3xl font-bold text-red-700">{failedSubmissions}</p>
-          <p className="text-sm text-red-600">Failed Submissions</p>
-        </div>
-        <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
-          <span className="text-3xl block mb-2">📜</span>
-          <p className="text-3xl font-bold text-blue-700">{passports.length}</p>
-          <p className="text-sm text-blue-600">Cattle Passports</p>
+
+        <div className="grid md:grid-cols-4 gap-4">
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-600 mb-1">Farm CPH</p>
+            <p className="text-lg font-bold text-gray-900">{farm?.cphNumber || 'Not set'}</p>
+          </div>
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-600 mb-1">Herd Mark</p>
+            <p className="text-lg font-bold text-gray-900">{farm?.herdMark || 'Not set'}</p>
+          </div>
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-600 mb-1">Total Animals</p>
+            <p className="text-lg font-bold text-gray-900">{totalCattle}</p>
+          </div>
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-600 mb-1">Holding SBI</p>
+            <p className="text-lg font-bold text-gray-900">{farm?.sbi || 'Not set'}</p>
+          </div>
         </div>
       </div>
 
-      {/* Pending BCMS Submissions */}
-      {pendingBcms > 0 && (
-        <div className="bg-amber-50 border-l-4 border-amber-500 p-6 mb-8 rounded-r-lg">
-          <div className="flex items-start">
-            <span className="text-3xl mr-4">⚠️</span>
-            <div className="flex-1">
-              <h3 className="text-lg font-bold text-amber-900 mb-2">Action Required</h3>
-              <p className="text-amber-800 mb-4">
-                You have {pendingBcms} movement{pendingBcms > 1 ? 's' : ''} that need to be submitted to BCMS within 3 days of the movement date.
-              </p>
-              <button className="bg-amber-700 text-white px-6 py-2 rounded-lg hover:bg-amber-800 transition font-medium">
-                Submit to BCMS
-              </button>
+      {/* Compliance Checks Grid */}
+      <div className="grid md:grid-cols-2 gap-6 mb-8">
+        {/* BCMS Status */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl">📋</span>
+                <h3 className="text-lg font-bold text-gray-900">BCMS Reporting</h3>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium bg-${getStatusColor(complianceChecks.bcms.status)}-100 text-${getStatusColor(complianceChecks.bcms.status)}-700`}>
+                {complianceChecks.bcms.status.replace('_', ' ')}
+              </span>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Last Update:</span>
+                <span className="font-medium text-gray-900">{complianceChecks.bcms.lastUpdate.toLocaleDateString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Pending Movements:</span>
+                <span className={`font-medium ${complianceChecks.bcms.pendingActions > 0 ? 'text-yellow-700' : 'text-green-700'}`}>
+                  {complianceChecks.bcms.pendingActions}
+                </span>
+              </div>
+              {complianceChecks.bcms.pendingActions > 0 && (
+                <div className="mt-4">
+                  <button className="w-full px-4 py-2 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 text-sm font-medium">
+                    Submit to BCMS →
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      )}
 
-      {/* Recent Movements */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-8">
-        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">Recent Movements</h2>
-          <button className="bg-emerald-700 text-white px-4 py-2 rounded-lg hover:bg-emerald-800 transition text-sm font-medium">
-            + Record Movement
-          </button>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Animal</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Breed</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Movement Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">From CPH</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">To CPH</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Haulier</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">BCMS Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">BCMS Ref</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {movements.map((movement) => (
-                <tr key={movement.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {movement.date.toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <p className="font-medium text-gray-900">{movement.cattle.name || movement.cattle.tagNumber}</p>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{movement.cattle.breed}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 py-1 text-xs rounded-full font-medium ${
-                        movement.movementType === 'ON'
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : movement.movementType === 'OFF'
-                          ? 'bg-red-100 text-red-700'
-                          : movement.movementType === 'BIRTH'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      {movement.movementType}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-600">
-                    {movement.fromCph || '-'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-600">
-                    {movement.toCph || '-'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{movement.haulier || '-'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {movement.bcmsSubmitted ? (
-                      <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full font-medium">
-                        ✓ Submitted
-                      </span>
-                    ) : (
-                      <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full font-medium">
-                        Pending
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-xs font-mono text-gray-600">
-                    {movement.bcmsReference || '-'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-8 mb-8">
-        {/* BCMS Submission History */}
+        {/* TB Testing */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100">
           <div className="p-6 border-b border-gray-100">
-            <h2 className="text-lg font-bold text-gray-900">BCMS Submission History</h2>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl">🧪</span>
+                <h3 className="text-lg font-bold text-gray-900">TB Testing</h3>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium bg-${getStatusColor(complianceChecks.tbTesting.herdStatus)}-100 text-${getStatusColor(complianceChecks.tbTesting.herdStatus)}-700`}>
+                {complianceChecks.tbTesting.herdStatus}
+              </span>
+            </div>
           </div>
-          <div className="divide-y divide-gray-100 max-h-96 overflow-y-auto">
-            {bCMSSubmissions.map((submission) => (
-              <div key={submission.id} className="p-4 hover:bg-gray-50">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900">
-                      {submission.movement?.cattle.tagNumber || 'N/A'}
-                    </p>
-                    <p className="text-sm text-gray-600">{submission.submissionType}</p>
-                  </div>
-                  <span
-                    className={`px-2 py-1 text-xs rounded-full font-medium ${
-                      submission.status === 'SUCCESS'
-                        ? 'bg-green-100 text-green-700'
-                        : submission.status === 'FAILED'
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-yellow-100 text-yellow-700'
-                    }`}
-                  >
-                    {submission.status}
+          <div className="p-6">
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Last Test:</span>
+                <span className="font-medium text-gray-900">{complianceChecks.tbTesting.lastTest.toLocaleDateString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Next Due:</span>
+                <span className="font-medium text-gray-900">{complianceChecks.tbTesting.nextDue.toLocaleDateString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Days Until:</span>
+                <span className="font-medium text-gray-900">
+                  {Math.ceil((complianceChecks.tbTesting.nextDue.getTime() - Date.now()) / (1000 * 60 * 60 * 24))}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Medicine Withdrawal */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl">💊</span>
+                <h3 className="text-lg font-bold text-gray-900">Medicine Withdrawals</h3>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium bg-${getStatusColor(complianceChecks.medicineRecords.status)}-100 text-${getStatusColor(complianceChecks.medicineRecords.status)}-700`}>
+                {complianceChecks.medicineRecords.status.replace('_', ' ')}
+              </span>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Active Withdrawals:</span>
+                <span className="font-medium text-gray-900">{complianceChecks.medicineRecords.activeWithdrawals}</span>
+              </div>
+              {complianceChecks.medicineRecords.nextExpiry && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Next Expiry:</span>
+                  <span className="font-medium text-gray-900">
+                    {complianceChecks.medicineRecords.nextExpiry.toLocaleDateString()}
                   </span>
                 </div>
-                <p className="text-xs text-gray-500">
-                  {submission.submissionDate.toLocaleDateString()} • Ref: {submission.referenceNumber || 'N/A'}
-                </p>
-                {submission.errorMessage && (
-                  <p className="text-xs text-red-600 mt-1">Error: {submission.errorMessage}</p>
-                )}
-              </div>
-            ))}
+              )}
+              {healthRecords.length > 0 && (
+                <div className="mt-4">
+                  <button className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium">
+                    View Active Withdrawals →
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Cattle Passports */}
+        {/* Red Tractor */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100">
           <div className="p-6 border-b border-gray-100">
-            <h2 className="text-lg font-bold text-gray-900">Recent Passports</h2>
-          </div>
-          <div className="divide-y divide-gray-100 max-h-96 overflow-y-auto">
-            {passports.map((passport) => (
-              <div key={passport.id} className="p-4 hover:bg-gray-50">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900">
-                      {passport.cattle.name || passport.cattle.tagNumber}
-                    </p>
-                    <p className="text-sm text-gray-600">{passport.cattle.breed}</p>
-                  </div>
-                  <p className="text-xs font-mono text-gray-500">{passport.passportNumber}</p>
-                </div>
-                <p className="text-xs text-gray-500">
-                  Issued: {passport.issueDate.toLocaleDateString()}
-                  {passport.replacementReason && ` • Replacement: ${passport.replacementReason}`}
-                </p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl">🚜</span>
+                <h3 className="text-lg font-bold text-gray-900">Red Tractor</h3>
               </div>
-            ))}
+              <span className={`px-3 py-1 rounded-full text-xs font-medium bg-${getStatusColor(complianceChecks.redTractor.status)}-100 text-${getStatusColor(complianceChecks.redTractor.status)}-700`}>
+                {complianceChecks.redTractor.status}
+              </span>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Last Audit:</span>
+                <span className="font-medium text-gray-900">{complianceChecks.redTractor.lastAudit.toLocaleDateString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Next Audit:</span>
+                <span className="font-medium text-gray-900">{complianceChecks.redTractor.nextAudit.toLocaleDateString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Certificate Valid Until:</span>
+                <span className="font-medium text-gray-900">{complianceChecks.redTractor.certificateExpiry.toLocaleDateString()}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Cross-Compliance */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl">✅</span>
+                <h3 className="text-lg font-bold text-gray-900">Cross-Compliance</h3>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium bg-${getStatusColor(complianceChecks.crossCompliance.status)}-100 text-${getStatusColor(complianceChecks.crossCompliance.status)}-700`}>
+                {complianceChecks.crossCompliance.status}
+              </span>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Last Check:</span>
+                <span className="font-medium text-gray-900">{complianceChecks.crossCompliance.lastCheck.toLocaleDateString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Next Review:</span>
+                <span className="font-medium text-gray-900">{complianceChecks.crossCompliance.nextReview.toLocaleDateString()}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* BPS/SFI */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl">💷</span>
+                <h3 className="text-lg font-bold text-gray-900">BPS Claim</h3>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium bg-${getStatusColor(complianceChecks.bps.status)}-100 text-${getStatusColor(complianceChecks.bps.status)}-700`}>
+                {complianceChecks.bps.status}
+              </span>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Claim Year:</span>
+                <span className="font-medium text-gray-900">{complianceChecks.bps.claimYear}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Submitted:</span>
+                <span className="font-medium text-gray-900">{complianceChecks.bps.submissionDate.toLocaleDateString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Payment Expected:</span>
+                <span className="font-medium text-gray-900">{complianceChecks.bps.paymentExpected.toLocaleDateString()}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="mt-8 flex flex-wrap gap-4">
-        <button className="bg-emerald-700 text-white px-6 py-3 rounded-lg hover:bg-emerald-800 transition font-medium">
-          + Record Movement
-        </button>
-        <button className="bg-white border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:border-emerald-500 hover:text-emerald-700 transition font-medium">
-          📤 Submit to BCMS
-        </button>
-        <button className="bg-white border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:border-emerald-500 hover:text-emerald-700 transition font-medium">
-          📜 Print Passport
-        </button>
-        <button className="bg-white border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:border-emerald-500 hover:text-emerald-700 transition font-medium">
-          📋 Inspection Checklist
-        </button>
+      {/* Vet Schedule */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-8">
+        <div className="p-6 border-b border-gray-100">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <span className="text-2xl">🏥</span>
+              <h2 className="text-xl font-bold text-gray-900">Veterinary Visits</h2>
+            </div>
+            <button className="px-4 py-2 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 text-sm font-medium">
+              Schedule Visit
+            </button>
+          </div>
+        </div>
+        <div className="p-6">
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-600 mb-1">Last Visit</p>
+              <p className="text-lg font-medium text-gray-900">{complianceChecks.vetVisits.lastVisit.toLocaleDateString()}</p>
+            </div>
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-600 mb-1">Next Scheduled</p>
+              <p className="text-lg font-medium text-gray-900">{complianceChecks.vetVisits.nextScheduled.toLocaleDateString()}</p>
+            </div>
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-600 mb-1">Annual Health Plan</p>
+              <p className="text-lg font-medium text-green-700">{complianceChecks.vetVisits.annualHealthPlan}</p>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Active Withdrawal Periods */}
+      {healthRecords.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="p-6 border-b border-gray-100">
+            <h2 className="text-xl font-bold text-gray-900">Active Medicine Withdrawal Periods</h2>
+          </div>
+          <div className="divide-y divide-gray-100">
+            {healthRecords.map((record) => {
+              const daysRemaining = Math.ceil((record.withdrawalEnds!.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+              
+              return (
+                <div key={record.id} className="p-4 hover:bg-gray-50">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">{record.cattle.name || record.cattle.tagNumber}</p>
+                      <p className="text-sm text-gray-600">{record.productName}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className={`text-lg font-bold ${daysRemaining <= 3 ? 'text-red-700' : 'text-yellow-700'}`}>
+                        {daysRemaining} days
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Ends: {record.withdrawalEnds?.toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

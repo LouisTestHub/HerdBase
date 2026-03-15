@@ -8,46 +8,43 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       items: [
         { name: 'Dashboard', href: '/dashboard', icon: '📊' },
         { name: 'Alerts', href: '/dashboard/alerts', icon: '🔔' },
+        { name: 'Weather', href: '/dashboard/weather', icon: '🌤️' },
       ],
     },
     {
       title: 'Herd',
       items: [
         { name: 'Herd Register', href: '/dashboard/herd', icon: '🐄' },
-        { name: 'Animal Profiles', href: '/dashboard/herd', icon: '📋' },
-        { name: 'Movements', href: '/dashboard/compliance', icon: '🚚' },
+        { name: 'Movements', href: '/dashboard/herd/movements', icon: '🚚' },
+        { name: 'Sales Prep', href: '/dashboard/herd/sales', icon: '💷' },
       ],
     },
     {
       title: 'Health',
       items: [
         { name: 'Health Records', href: '/dashboard/health', icon: '🏥' },
-        { name: 'Treatments', href: '/dashboard/health', icon: '💉' },
-        { name: 'Medications', href: '/dashboard/health', icon: '💊' },
+        { name: 'TB Testing', href: '/dashboard/health/tb-testing', icon: '🧪' },
       ],
     },
     {
       title: 'Breeding',
       items: [
         { name: 'Breeding Plans', href: '/dashboard/breeding', icon: '💝' },
-        { name: 'AI Records', href: '/dashboard/breeding', icon: '🧬' },
-        { name: 'Pregnancy Checks', href: '/dashboard/breeding', icon: '🤰' },
+        { name: 'AI Insights', href: '/dashboard/breeding/ai-insights', icon: '🧬' },
       ],
     },
     {
       title: 'Calving',
       items: [
         { name: 'Calving Monitor', href: '/dashboard/calving', icon: '🍼' },
-        { name: 'Due Dates', href: '/dashboard/calving', icon: '📅' },
-        { name: 'Calving History', href: '/dashboard/calving', icon: '📖' },
+        { name: 'Alert System', href: '/dashboard/calving/alerts', icon: '⚠️' },
       ],
     },
     {
       title: 'Feed',
       items: [
         { name: 'Feed Plans', href: '/dashboard/feed', icon: '🌾' },
-        { name: 'Rations', href: '/dashboard/feed', icon: '🧮' },
-        { name: 'Stock Levels', href: '/dashboard/feed', icon: '📦' },
+        { name: 'Cost Calculator', href: '/dashboard/feed/calculator', icon: '🧮' },
       ],
     },
     {
@@ -60,9 +57,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     {
       title: 'Pasture',
       items: [
-        { name: 'Paddock Map', href: '/dashboard/pasture', icon: '🗺️' },
-        { name: 'Grazing Rotation', href: '/dashboard/pasture', icon: '🔄' },
-        { name: 'Grass Measurement', href: '/dashboard/pasture', icon: '🌱' },
+        { name: 'Paddock Overview', href: '/dashboard/pasture', icon: '🌱' },
+        { name: 'Farm Map', href: '/dashboard/pasture/map', icon: '🗺️' },
       ],
     },
     {
@@ -73,11 +69,17 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       ],
     },
     {
+      title: 'Compliance',
+      items: [
+        { name: 'Compliance Dashboard', href: '/dashboard/compliance', icon: '✅' },
+        { name: 'BCMS Integration', href: '/settings', icon: '🔗' },
+      ],
+    },
+    {
       title: 'Settings',
       items: [
         { name: 'Farm Profile', href: '/settings', icon: '🏠' },
         { name: 'Users', href: '/settings', icon: '👥' },
-        { name: 'BCMS Integration', href: '/settings', icon: '🔗' },
         { name: 'Data Export', href: '/settings', icon: '📤' },
       ],
     },
