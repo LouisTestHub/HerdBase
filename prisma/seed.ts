@@ -268,26 +268,33 @@ async function main() {
 
   console.log('✅ Bulls created');
 
-  // Create Weight Records (10-15 per animal)
-  const weightRecordPromises = [];
+  // Create Weight Records (10-15 per animal) - BATCHED to avoid connection pool exhaustion
+  const weightRecords = [];
   for (const animal of cattle.slice(0, 50)) { // First 50 animals get detailed weight history
     const recordCount = Math.floor(Math.random() * 6) + 10; // 10-15 records
     for (let i = 0; i < recordCount; i++) {
       const daysAgo = i * 30 + Math.floor(Math.random() * 20);
-      weightRecordPromises.push(
-        prisma.weightRecord.create({
-          data: {
-            cattleId: animal.id,
-            date: new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000),
-            weight: (animal.currentWeight || 500) - (recordCount - i) * 15 + Math.random() * 20,
-            method: 'WALK_OVER_SCALE',
-            recordedById: [owner.id, manager.id, worker.id][Math.floor(Math.random() * 3)],
-          },
-        })
-      );
+      weightRecords.push({
+        cattleId: animal.id,
+        date: new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000),
+        weight: (animal.currentWeight || 500) - (recordCount - i) * 15 + Math.random() * 20,
+        method: 'WALK_OVER_SCALE',
+        recordedById: [owner.id, manager.id, worker.id][Math.floor(Math.random() * 3)],
+      });
     }
   }
-  await Promise.all(weightRecordPromises);
+  
+  // Insert weight records in batches of 50
+  const batchSize = 50;
+  for (let i = 0; i < weightRecords.length; i += batchSize) {
+    const batch = weightRecords.slice(i, i + batchSize);
+    await prisma.weightRecord.createMany({ data: batch });
+    console.log(`   • Weight records batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(weightRecords.length / batchSize)} inserted`);
+    // Small delay to prevent connection pool exhaustion
+    if (i + batchSize < weightRecords.length) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  }
 
   console.log('✅ Weight records created');
 
