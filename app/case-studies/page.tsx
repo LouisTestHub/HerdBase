@@ -1,5 +1,56 @@
 import Link from 'next/link';
 
+const caseStudies = [
+  {
+    slug: 'oakfield-farm',
+    farm: 'Oakfield Farm',
+    farmer: 'Harvey Jones',
+    location: 'Herefordshire',
+    herd: '350-head Hereford/Angus',
+    type: 'Mixed Beef & Dairy',
+    tagColor: 'bg-amber-700',
+    headline: '£18K feed savings, conception rate 42%→68%, 12hrs/week saved',
+    image: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=800&q=80',
+    stats: [
+      { value: '£18K', label: 'Feed savings' },
+      { value: '12 hrs/wk', label: 'Time saved' },
+      { value: '42→68%', label: 'Conception' },
+    ],
+  },
+  {
+    slug: 'williams-family-farm',
+    farm: 'Williams Family Farm',
+    farmer: 'Wyn Williams',
+    location: 'Powys, Mid Wales',
+    herd: '600 Welsh Black cattle',
+    type: 'Hill Farm',
+    tagColor: 'bg-[#1B5E20]',
+    headline: 'TB testing admin cut 80%, breeding records digitised, calving losses down 15%',
+    image: 'https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=800&q=80',
+    stats: [
+      { value: '-80%', label: 'TB admin' },
+      { value: '-15%', label: 'Calving losses' },
+      { value: '100%', label: 'Digitised' },
+    ],
+  },
+  {
+    slug: 'riverside-herefords',
+    farm: 'Riverside Herefords',
+    farmer: 'Tom & Emma Bradshaw',
+    location: 'Somerset',
+    herd: '200 pedigree Herefords',
+    type: 'Pedigree Breeding',
+    tagColor: 'bg-amber-700',
+    headline: 'Breed society submissions automated, sale lot prep halved, record prices at market',
+    image: 'https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?w=800&q=80',
+    stats: [
+      { value: 'Auto', label: 'Registrations' },
+      { value: '-50%', label: 'Sale prep' },
+      { value: 'Record', label: 'Market prices' },
+    ],
+  },
+];
+
 export default function CaseStudiesPage() {
   return (
     <div className="min-h-screen bg-white">
@@ -37,208 +88,47 @@ export default function CaseStudiesPage() {
         </div>
       </section>
 
-      {/* Case Study 1: Oakfield Farm */}
+      {/* Case Study Cards */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl">
-              <img 
-                src="https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=800&q=80" 
-                alt="Hereford and Angus cattle grazing in green fields"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            
-            <div>
-              <div className="inline-block bg-amber-700 text-white px-4 py-2 rounded-full text-sm font-semibold mb-4">
-                Beef Suckler Herd
-              </div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                Oakfield Farm: Zero Missed Calvings, 10 Minutes for BCMS Returns
-              </h2>
-              <div className="flex items-center space-x-4 mb-6">
-                <div className="flex items-center text-gray-600">
-                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                  </svg>
-                  Herefordshire
+          <div className="grid lg:grid-cols-3 gap-8">
+            {caseStudies.map((study) => (
+              <Link
+                key={study.slug}
+                href={`/case-studies/${study.slug}`}
+                className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all"
+              >
+                <div className="relative h-52 overflow-hidden">
+                  <img
+                    src={study.image}
+                    alt={study.farm}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4 text-white">
+                    <div className={`inline-block ${study.tagColor} text-white px-3 py-1 rounded-full text-xs font-semibold mb-2`}>
+                      {study.type}
+                    </div>
+                    <h2 className="text-xl font-bold">{study.farm}</h2>
+                    <p className="text-sm text-gray-300">{study.location} · {study.herd}</p>
+                  </div>
                 </div>
-                <div className="flex items-center text-gray-600">
-                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                  </svg>
-                  350-head Hereford/Angus cross
+                <div className="p-6">
+                  <p className="text-sm font-semibold text-gray-900 mb-4">&ldquo;{study.headline}&rdquo;</p>
+                  <div className="grid grid-cols-3 gap-3 mb-4">
+                    {study.stats.map((stat, i) => (
+                      <div key={i} className="text-center">
+                        <div className="text-lg font-bold text-[#1B5E20]">{stat.value}</div>
+                        <div className="text-xs text-gray-500">{stat.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-[#1B5E20] font-medium text-sm group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                    Read full story →
+                  </p>
                 </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-xl shadow-md mb-6 border-l-4 border-amber-700">
-                <p className="text-lg text-gray-700 italic">
-                  "We used to have paper calving records all over the kitchen table. We missed two calvings 
-                  last spring because the due dates were buried in a notebook. Since HerdBase, we've had zero 
-                  missed calvings and my BCMS monthly return takes 10 minutes instead of 2 days."
-                </p>
-                <div className="mt-4">
-                  <p className="font-bold text-gray-900">James Pritchard</p>
-                  <p className="text-sm text-gray-600">Farm Manager, Oakfield Farm</p>
-                </div>
-              </div>
-
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">The Challenge</h3>
-              <p className="text-gray-700 mb-4">
-                Oakfield Farm was running 350 Hereford and Angus suckler cows with paper records scattered 
-                across notebooks, sticky notes, and WhatsApp messages. Calving dates were calculated manually, 
-                and twice in spring 2024 they missed calvings because due dates weren't flagged. BCMS monthly 
-                returns took 2 full days of cross-referencing birth records, movements, and deaths from multiple 
-                sources.
-              </p>
-
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">The Solution</h3>
-              <ul className="space-y-3 mb-6">
-                <li className="flex items-start">
-                  <svg className="w-6 h-6 text-amber-700 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Imported all cow records and breeding history into HerdBase in one afternoon</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-6 h-6 text-amber-700 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Set up automatic calving alerts 7 days before due date on mobile</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-6 h-6 text-amber-700 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Enabled BCMS integration for automatic birth and movement reporting</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-6 h-6 text-amber-700 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Mobile app allows recording calvings, treatments, and movements from the field</span>
-                </li>
-              </ul>
-
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">The Results</h3>
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="bg-amber-700 text-white p-6 rounded-xl text-center">
-                  <div className="text-4xl font-bold mb-2">Zero</div>
-                  <div className="text-sm text-amber-100">missed calvings since setup</div>
-                </div>
-                <div className="bg-amber-700 text-white p-6 rounded-xl text-center">
-                  <div className="text-4xl font-bold mb-2">10 mins</div>
-                  <div className="text-sm text-amber-100">BCMS reporting (down from 2 days)</div>
-                </div>
-                <div className="bg-amber-700 text-white p-6 rounded-xl text-center">
-                  <div className="text-4xl font-bold mb-2">100%</div>
-                  <div className="text-sm text-amber-100">compliance on inspections</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Case Study 2: Riverside Dairy */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="order-2 lg:order-1">
-              <div className="inline-block bg-[#1B5E20] text-white px-4 py-2 rounded-full text-sm font-semibold mb-4">
-                Dairy Farm
-              </div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                Riverside Dairy: Conception Rate 42% → 68%, £18K Feed Savings
-              </h2>
-              <div className="flex items-center space-x-4 mb-6">
-                <div className="flex items-center text-gray-600">
-                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                  </svg>
-                  Somerset
-                </div>
-                <div className="flex items-center text-gray-600">
-                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                  </svg>
-                  500-head Holstein dairy
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-xl shadow-md mb-6 border-l-4 border-[#1B5E20]">
-                <p className="text-lg text-gray-700 italic">
-                  "Our conception rate was stuck at 42% for years. We didn't know which cows were problem 
-                  breeders, which bulls were working, or when heat detection was failing. HerdBase gave us 
-                  the data to make better decisions. We've lifted conception to 68% and cut £18k from our 
-                  annual feed bill by culling the right cows."
-                </p>
-                <div className="mt-4">
-                  <p className="font-bold text-gray-900">Rachel Cooper</p>
-                  <p className="text-sm text-gray-600">Herd Manager, Riverside Dairy</p>
-                </div>
-              </div>
-
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">The Challenge</h3>
-              <p className="text-gray-700 mb-4">
-                Riverside Dairy was running 500 Holsteins with poor breeding efficiency. Their conception rate 
-                had been stuck at 42% for three years. They didn't have visibility into which cows were repeat 
-                breeders, which sires were performing, or whether heat detection was working. Feed costs were 
-                high because low-producing, hard-to-get-in-calf cows were staying in the herd too long.
-              </p>
-
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">The Solution</h3>
-              <ul className="space-y-3 mb-6">
-                <li className="flex items-start">
-                  <svg className="w-6 h-6 text-[#1B5E20] mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Tracked every service, pregnancy check, and calving in HerdBase</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-6 h-6 text-[#1B5E20] mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Used breeding reports to identify repeat breeders and low-conception bloodlines</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-6 h-6 text-[#1B5E20] mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Culled 38 cows with poor breeding performance and low production</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-6 h-6 text-[#1B5E20] mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">Switched to genomic-tested sires based on HerdBase sire conception data</span>
-                </li>
-              </ul>
-
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">The Results</h3>
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="bg-[#1B5E20] text-white p-6 rounded-xl text-center">
-                  <div className="text-4xl font-bold mb-2">42→68%</div>
-                  <div className="text-sm text-green-100">conception rate improvement</div>
-                </div>
-                <div className="bg-[#1B5E20] text-white p-6 rounded-xl text-center">
-                  <div className="text-4xl font-bold mb-2">£18K</div>
-                  <div className="text-sm text-green-100">annual feed cost savings</div>
-                </div>
-                <div className="bg-[#1B5E20] text-white p-6 rounded-xl text-center">
-                  <div className="text-4xl font-bold mb-2">+8%</div>
-                  <div className="text-sm text-green-100">herd yield improvement</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="order-1 lg:order-2 relative h-[500px] rounded-2xl overflow-hidden shadow-2xl">
-              <img 
-                src="https://images.unsplash.com/photo-1560493676-04071c5f467b?w=800&q=80" 
-                alt="Holstein dairy cows in modern milking parlour"
-                className="w-full h-full object-cover"
-              />
-            </div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -281,13 +171,13 @@ export default function CaseStudiesPage() {
             <div>
               <h4 className="text-white font-semibold mb-4">Resources</h4>
               <ul className="space-y-2 text-sm">
-                <li><Link href="/resources" className="hover:text-white transition">Blog & Guides</Link></li>
+                <li><Link href="/resources" className="hover:text-white transition">Blog &amp; Guides</Link></li>
                 <li><Link href="#" className="hover:text-white transition">Help Centre</Link></li>
               </ul>
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
-            <p>&copy; 2025 HerdBase by Data & Digital. All rights reserved.</p>
+            <p>&copy; 2025 HerdBase by Data &amp; Digital. All rights reserved.</p>
           </div>
         </div>
       </footer>

@@ -67,20 +67,14 @@ export default function HomePage() {
                   <stop offset="100%" style={{stopColor: '#059669', stopOpacity: 0.3}} />
                 </linearGradient>
               </defs>
-              
-              {/* Background - Rolling hills */}
               <path d="M 0 350 Q 150 280 300 350 T 600 350 L 600 500 L 0 500 Z" fill="url(#grassGradient)" />
               <path d="M 0 380 Q 180 320 360 380 T 600 380 L 600 500 L 0 500 Z" fill="#10b981" fillOpacity="0.15" />
-              
-              {/* Fence */}
               <line x1="50" y1="320" x2="50" y2="380" stroke="#8B4513" strokeWidth="4" />
               <line x1="150" y1="310" x2="150" y2="370" stroke="#8B4513" strokeWidth="4" />
               <line x1="250" y1="320" x2="250" y2="380" stroke="#8B4513" strokeWidth="4" />
               <line x1="350" y1="315" x2="350" y2="375" stroke="#8B4513" strokeWidth="4" />
               <line x1="50" y1="340" x2="350" y2="335" stroke="#8B4513" strokeWidth="3" />
               <line x1="50" y1="360" x2="350" y2="355" stroke="#8B4513" strokeWidth="3" />
-              
-              {/* Cow 1 - Foreground, black and white dairy cow */}
               <g transform="translate(350, 340)">
                 <ellipse cx="0" cy="0" rx="80" ry="50" fill="#ffffff" stroke="#1f2937" strokeWidth="2" />
                 <ellipse cx="-20" cy="-10" rx="30" ry="35" fill="#1f2937" />
@@ -95,8 +89,6 @@ export default function HomePage() {
                 <line x1="35" y1="40" x2="35" y2="65" stroke="#1f2937" strokeWidth="4" />
                 <path d="M 60 -8 Q 80 -15 85 -20 L 90 -18 L 88 -12 Q 82 -8 65 -3 Z" fill="#1f2937" />
               </g>
-
-              {/* Cow 2 - Background, brown beef cow */}
               <g transform="translate(150, 300) scale(0.75)">
                 <ellipse cx="0" cy="0" rx="80" ry="50" fill="#8B4513" stroke="#654321" strokeWidth="2" />
                 <circle cx="-50" cy="-5" r="28" fill="#8B4513" stroke="#654321" strokeWidth="2" />
@@ -109,15 +101,106 @@ export default function HomePage() {
                 <line x1="35" y1="40" x2="35" y2="65" stroke="#654321" strokeWidth="4" />
                 <path d="M 60 -8 Q 80 -15 85 -20 L 90 -18 L 88 -12 Q 82 -8 65 -3 Z" fill="#654321" />
               </g>
-
-              {/* Sun */}
               <circle cx="500" cy="80" r="40" fill="#fbbf24" opacity="0.8" />
-              
-              {/* Clouds */}
               <ellipse cx="100" cy="100" rx="40" ry="25" fill="#ffffff" opacity="0.7" />
               <ellipse cx="130" cy="100" rx="50" ry="30" fill="#ffffff" opacity="0.7" />
               <ellipse cx="160" cy="105" rx="35" ry="22" fill="#ffffff" opacity="0.7" />
             </svg>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust Stats Bar */}
+      <section className="bg-[#1B5E20] py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+            {[
+              { value: '200+', label: 'UK Farms' },
+              { value: '50,000+', label: 'Cattle Tracked' },
+              { value: '99.9%', label: 'Uptime' },
+            ].map((stat) => (
+              <div key={stat.label}>
+                <div className="text-2xl md:text-3xl font-bold text-white tabular-nums">{stat.value}</div>
+                <div className="text-emerald-200 text-sm mt-1">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Review Badges */}
+      <section className="py-10 bg-white border-b border-emerald-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-sm text-gray-500 mb-6">Trusted by farmers. Rated by the industry.</p>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+            {[
+              { name: 'Capterra', rating: '4.8/5' },
+              { name: 'G2', rating: '4.8/5' },
+              { name: 'Software Advice', rating: '4.9/5' },
+              { name: 'GetApp', rating: '4.8/5' },
+            ].map((badge) => (
+              <div key={badge.name} className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-3">
+                <div className="flex gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <svg key={i} className="w-3.5 h-3.5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <div>
+                  <span className="text-sm font-semibold text-gray-900">{badge.rating}</span>
+                  <span className="text-xs text-gray-500 ml-1">on {badge.name}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Unlimited Messaging */}
+      <section className="py-16 bg-gradient-to-r from-emerald-700 to-emerald-800">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">No Limits on Paid Plans</h2>
+          <p className="text-emerald-100 text-lg mb-8">Scale your herd without scaling your costs.</p>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { icon: '🐄', label: 'Unlimited Animals' },
+              { icon: '📋', label: 'Unlimited Records' },
+              { icon: '📊', label: 'Unlimited Exports' },
+            ].map((item) => (
+              <div key={item.label} className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                <div className="text-4xl mb-3">{item.icon}</div>
+                <div className="text-xl font-bold text-white">{item.label}</div>
+              </div>
+            ))}
+          </div>
+          <p className="text-emerald-200 text-sm mt-4">Available on Professional and Enterprise plans</p>
+        </div>
+      </section>
+
+      {/* Video Demo Section */}
+      <section id="demo" className="py-20 bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-sm font-semibold text-emerald-700 uppercase tracking-wider mb-2">Product Demo</p>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">See HerdBase in 2 Minutes</h2>
+          <p className="text-gray-600 mb-8 max-w-xl mx-auto">Watch how UK farmers manage their herds, track health records, and stay BCMS-compliant.</p>
+          <div className="relative aspect-video bg-gray-900 rounded-2xl overflow-hidden shadow-2xl group cursor-pointer">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-900 to-emerald-700 flex items-center justify-center">
+              <div className="absolute inset-0 opacity-20">
+                <div className="grid grid-cols-3 gap-4 p-8 h-full">
+                  <div className="bg-white/10 rounded-lg" />
+                  <div className="bg-white/10 rounded-lg col-span-2" />
+                  <div className="bg-white/10 rounded-lg col-span-2" />
+                  <div className="bg-white/10 rounded-lg" />
+                </div>
+              </div>
+              <div className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform z-10">
+                <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                </svg>
+              </div>
+            </div>
+            <div className="absolute bottom-4 left-4 bg-black/60 text-white text-xs px-3 py-1 rounded-full z-10">2:22</div>
           </div>
         </div>
       </section>
@@ -151,8 +234,159 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* New Features Showcase */}
+      <section className="py-20 bg-gradient-to-b from-white to-emerald-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <span className="inline-block bg-emerald-100 text-emerald-800 text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
+              New Features
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+              Just Launched — Built for UK Farmers
+            </h2>
+            <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+              New tools designed to save you time, keep you compliant, and help you run a more profitable farm.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                icon: '📖',
+                title: 'Free Calving Book',
+                desc: 'Digital calving book available free for every farmer. Record calvings, track ease scores, and register calves — no subscription needed.',
+                badge: 'Free',
+              },
+              {
+                icon: '📱',
+                title: 'Offline PWA',
+                desc: 'Full app works without signal. Record data in the field, in the parlour, or anywhere on your farm. Syncs automatically when back online.',
+                badge: 'Mobile',
+              },
+              {
+                icon: '🧪',
+                title: 'TB Testing Module',
+                desc: 'Digital TB test recording, results tracking, movement restrictions, and pre-movement testing reminders. Stay compliant with APHA requirements.',
+                badge: 'Compliance',
+              },
+              {
+                icon: '🏪',
+                title: 'Livestock Markets',
+                desc: 'Connect to market data. Pre-sale consignment lists, post-sale record updates, and automatic movement notifications to BCMS.',
+                badge: 'Markets',
+              },
+              {
+                icon: '🏆',
+                title: 'Breed Association Exports',
+                desc: 'Export registrations directly to breed societies. Compatible with major UK breed associations for pedigree and performance recording.',
+                badge: 'Exports',
+              },
+            ].map((feature) => (
+              <div key={feature.title} className="flex gap-5 bg-white p-6 rounded-xl border border-emerald-200 hover:shadow-lg transition-all">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-2xl">
+                    {feature.icon}
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{feature.title}</h3>
+                    <span className="text-xs font-medium bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">{feature.badge}</span>
+                  </div>
+                  <p className="text-gray-600 text-sm leading-relaxed">{feature.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Up and Running in 3 Steps</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-12">
+            {[
+              { step: '1', title: 'Sign Up', desc: 'Create your free account in 2 minutes. No credit card needed. Start with the free calving book or pick a plan.', icon: '🚀' },
+              { step: '2', title: 'Set Up Your Herd', desc: 'Import your herd from CSV, BCMS, or add animals manually. Set up your farm, fields, and management groups.', icon: '⚙️' },
+              { step: '3', title: 'Start Managing', desc: 'Record health, breeding, weights, and movements. Stay compliant with BCMS. See your herd performance at a glance.', icon: '📊' },
+            ].map((item) => (
+              <div key={item.step} className="text-center">
+                <div className="w-16 h-16 rounded-full bg-emerald-700 text-white text-2xl font-bold flex items-center justify-center mx-auto mb-6">{item.step}</div>
+                <div className="text-3xl mb-3">{item.icon}</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
+                <p className="text-gray-600 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Social Proof / Testimonials */}
+      <section id="testimonials" className="py-20 bg-emerald-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Loved by farmers across the UK</h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                name: 'James Hartley',
+                role: 'Dairy Farmer',
+                company: '250-head dairy, Yorkshire',
+                initials: 'JH',
+                quote: 'HerdBase saved us during our Red Tractor audit. Everything in one place, no more digging through notebooks.',
+                result: 'Audit-ready in 10 mins',
+                stars: 5,
+              },
+              {
+                name: 'Emma Davies',
+                role: 'Beef Producer',
+                company: '180-head beef, Welsh Borders',
+                initials: 'ED',
+                quote: 'The breeding module is brilliant. Heat alerts from our sensors go straight into the app. We haven\'t missed a service in 6 months.',
+                result: '100% conception rate',
+                stars: 5,
+              },
+              {
+                name: 'Robert McGregor',
+                role: 'Suckler Herd Manager',
+                company: '95-head suckler, Scotland',
+                initials: 'RM',
+                quote: 'Finally know exactly what each cow costs to feed. The profit-per-cow dashboard changed how we make culling decisions.',
+                result: '£45/head more profit',
+                stars: 5,
+              },
+            ].map((testimonial) => (
+              <div key={testimonial.name} className="bg-white p-8 rounded-xl border border-emerald-200">
+                <div className="flex items-center mb-4">
+                  {[...Array(testimonial.stars)].map((_, i) => (
+                    <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-gray-700 mb-4 italic">&ldquo;{testimonial.quote}&rdquo;</p>
+                <div className="mb-4">
+                  <span className="inline-block bg-emerald-100 text-emerald-800 text-xs font-semibold px-3 py-1 rounded-full">{testimonial.result}</span>
+                </div>
+                <div className="border-t border-emerald-100 pt-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-emerald-700 flex items-center justify-center text-white text-sm font-bold">{testimonial.initials}</div>
+                  <div>
+                    <p className="font-semibold text-gray-900">{testimonial.name}</p>
+                    <p className="text-sm text-gray-600">{testimonial.role}, {testimonial.company}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Pricing Section */}
-      <section id="pricing" className="py-20 bg-emerald-50">
+      <section id="pricing" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Simple, honest pricing</h2>
@@ -196,46 +430,20 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section id="testimonials" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Loved by farmers across the UK</h2>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { name: 'James Hartley', farm: '250-head dairy, Yorkshire', quote: 'HerdBase saved us during our Red Tractor audit. Everything in one place, no more digging through notebooks.' },
-              { name: 'Emma Davies', farm: '180-head beef, Welsh Borders', quote: 'The breeding module is brilliant. Heat alerts from our sensors go straight into the app. We haven\'t missed a service in 6 months.' },
-              { name: 'Robert McGregor', farm: '95-head suckler herd, Scotland', quote: 'Finally know exactly what each cow costs to feed. The profit-per-cow dashboard changed how we make culling decisions.' },
-            ].map((testimonial, idx) => (
-              <div key={idx} className="bg-emerald-50 p-8 rounded-xl">
-                <div className="flex items-center mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-                <p className="text-gray-700 mb-4 italic">&ldquo;{testimonial.quote}&rdquo;</p>
-                <div className="border-t border-emerald-200 pt-4">
-                  <p className="font-semibold text-gray-900">{testimonial.name}</p>
-                  <p className="text-sm text-gray-600">{testimonial.farm}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
+      {/* Final CTA Section */}
       <section className="bg-emerald-700 py-20">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-bold text-white mb-6">Ready to modernise your farm records?</h2>
+          <h2 className="text-4xl font-bold text-white mb-4">Ready to modernise your farm records?</h2>
+          <p className="text-emerald-100 font-semibold mb-2">Start your free 14-day trial — no credit card required</p>
           <p className="text-xl text-emerald-100 mb-8">Join hundreds of UK cattle farmers managing their herds with HerdBase</p>
-          <Link href="/login" className="inline-block bg-white text-emerald-700 px-10 py-4 rounded-lg text-lg font-semibold hover:bg-emerald-50 transition">
-            Start Your Free Trial
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/login" className="inline-block bg-white text-emerald-700 px-10 py-4 rounded-lg text-lg font-semibold hover:bg-emerald-50 transition">
+              Start Your Free Trial
+            </Link>
+            <Link href="/contact" className="inline-block border-2 border-white text-white px-10 py-4 rounded-lg text-lg font-semibold hover:bg-emerald-600 transition">
+              Book a Demo
+            </Link>
+          </div>
           <p className="text-emerald-200 mt-4">14 days free • No credit card • Cancel anytime</p>
         </div>
       </section>
@@ -273,7 +481,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
-            <p>&copy; 2025 HerdBase by Data & Digital. All rights reserved.</p>
+            <p>&copy; 2026 HerdBase by Data & Digital. All rights reserved.</p>
           </div>
         </div>
       </footer>
