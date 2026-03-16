@@ -21,8 +21,9 @@ export default function HomePage() {
             <Link href="/features" className="text-gray-700 hover:text-[#1B5E20] transition">Features</Link>
             <Link href="/pricing" className="text-gray-700 hover:text-[#1B5E20] transition">Pricing</Link>
             <Link href="/about" className="text-gray-700 hover:text-[#1B5E20] transition">About</Link>
+            <Link href="/opportunity" className="text-gray-700 hover:text-[#1B5E20] transition">Opportunity</Link>
+            <Link href="/market" className="text-gray-700 hover:text-[#1B5E20] transition">Market Research</Link>
             <Link href="/case-studies" className="text-gray-700 hover:text-[#1B5E20] transition">Case Studies</Link>
-            <Link href="/contact" className="text-gray-700 hover:text-[#1B5E20] transition">Contact</Link>
           </nav>
           <Link href="/login" className="bg-[#1B5E20] text-white px-6 py-2 rounded-lg hover:bg-[#2E7D32] transition">
             Sign In
