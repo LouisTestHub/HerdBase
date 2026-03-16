@@ -48,14 +48,14 @@ export default function HomePage() {
               Built for UK cattle farmers who want to stay compliant and profitable.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/login" className="bg-emerald-700 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-emerald-800 transition text-center">
-                Start Free Trial
+              <Link href="/register" className="bg-emerald-700 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-emerald-800 transition text-center">
+                Start Free Calving Book
               </Link>
-              <Link href="#demo" className="border-2 border-emerald-700 text-emerald-700 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-emerald-50 transition text-center">
-                Watch Demo
+              <Link href="/login" className="border-2 border-emerald-700 text-emerald-700 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-emerald-50 transition text-center">
+                Try Free Demo →
               </Link>
             </div>
-            <p className="text-sm text-gray-500 mt-4">14-day free trial • No credit card required • Cancel anytime</p>
+            <p className="text-sm text-gray-500 mt-4">No credit card required • Free forever for up to 50 animals • Works offline in the field</p>
           </div>
 
           {/* Cattle SVG Illustration */}
