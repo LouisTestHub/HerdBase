@@ -20,6 +20,7 @@ enum Role {
 }
 
 enum SubscriptionPlan {
+  FREE
   STARTER
   PROFESSIONAL
   ENTERPRISE
@@ -142,6 +143,10 @@ model Farm {
   sensorData            SensorData[]
   bcmsSubmissions       BCMSSubmission[]
   cattlePassports       CattlePassport[]
+  tbTests               TBTest[]
+  tbSettings            TBSettings?
+  saleLots              SaleLot[]
+  exportLogs            ExportLog[]
 }
 
 model User {
@@ -155,6 +160,7 @@ model User {
   avatar            String?
   emailVerified     DateTime?
   password          String?
+  plan              SubscriptionPlan @default(FREE)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -219,6 +225,7 @@ model Cattle {
   weightRecords     WeightRecord[]
   sensorData        SensorData[]
   cattlePassport    CattlePassport?
+  tbTestResults     TBTestResult_Animal[]
 
   @@index([farmId])
   @@index([status])
@@ -818,4 +825,153 @@ model Grant {
   @@index([farmId])
   @@index([scheme])
   @@index([year])
+}
+
+// ========================================
+// MODULE 9: TB TESTING (CW11)
+// ========================================
+
+enum TBTestResult {
+  NEGATIVE
+  INCONCLUSIVE
+  REACTOR
+  NOT_TESTED
+}
+
+enum OTFStatus {
+  OTF
+  OTF_WITHDRAWN
+  OTF_SUSPENDED
+}
+
+enum RiskArea {
+  HRA
+  EDGE
+  LRA
+}
+
+model TBTest {
+  id                String        @id @default(cuid())
+  farmId            String
+  farm              Farm          @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  testDate          DateTime
+  nextTestDue       DateTime?
+  vetName           String?
+  aphaReference     String?
+
+  totalTested       Int           @default(0)
+  totalNegative     Int           @default(0)
+  totalInconclusive Int           @default(0)
+  totalReactors     Int           @default(0)
+
+  otfStatusBefore   OTFStatus     @default(OTF)
+  otfStatusAfter    OTFStatus     @default(OTF)
+
+  notes             String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  results           TBTestResult_Animal[]
+
+  @@index([farmId])
+  @@index([testDate])
+}
+
+model TBTestResult_Animal {
+  id                String        @id @default(cuid())
+  tbTestId          String
+  tbTest            TBTest        @relation(fields: [tbTestId], references: [id], onDelete: Cascade)
+  cattleId          String
+  cattle            Cattle        @relation(fields: [cattleId], references: [id], onDelete: Cascade)
+
+  result            TBTestResult  @default(NOT_TESTED)
+  skinMeasurement1  Float?
+  skinMeasurement2  Float?
+  reactorFollowUp   String?
+  removalDate       DateTime?
+
+  notes             String?
+  createdAt         DateTime      @default(now())
+
+  @@index([tbTestId])
+  @@index([cattleId])
+}
+
+model TBSettings {
+  id                String    @id @default(cuid())
+  farmId            String    @unique
+  farm              Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  riskArea          RiskArea  @default(LRA)
+  testingIntervalMonths Int   @default(48)
+  aphaHoldingNumber String?
+  autoReminders     Boolean   @default(true)
+  reminderDaysBefore Int      @default(30)
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+// ========================================
+// MODULE 10: MARKETS & EXPORTS (CW12)
+// ========================================
+
+model MarketEntry {
+  id                String    @id @default(cuid())
+  name              String
+  location          String
+  county            String?
+  postcode          String?
+  lat               Float?
+  lng               Float?
+  marketDay         String?
+  specialistSales   String?
+  phone             String?
+  website           String?
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model SaleLot {
+  id                String    @id @default(cuid())
+  farmId            String
+  farm              Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  lotNumber         String?
+  marketName        String?
+  saleDate          DateTime?
+  status            String    @default("DRAFT")
+
+  animalIds         String[]
+  totalAnimals      Int       @default(0)
+  estimatedValue    Float?
+
+  movementLicence   Boolean   @default(false)
+  preSaleChecklist  String?
+
+  notes             String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([farmId])
+  @@index([saleDate])
+}
+
+model ExportLog {
+  id                String    @id @default(cuid())
+  farmId            String
+  farm              Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  exportType        String
+  format            String
+  fileName          String?
+  recordCount       Int       @default(0)
+  status            String    @default("COMPLETED")
+
+  createdAt         DateTime  @default(now())
+
+  @@index([farmId])
+  @@index([createdAt])
 }

@@ -1,0 +1,25 @@
+{
+  "name": "HerdBase - Cattle Herd Management",
+  "short_name": "HerdBase",
+  "description": "Complete cattle herd management platform for UK farmers",
+  "start_url": "/free/calving",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#047857",
+  "orientation": "portrait-primary",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
